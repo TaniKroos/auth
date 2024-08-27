@@ -22,14 +22,23 @@ const handleErrors = (err) => {
         errors[properties.path] = properties.message;
       });
     }
-  
+    
+
+    if(err.message === 'incorrect email'){
+        errors.email = 'That email is not registered'
+    }
+
+    if(err.message === 'incorrect password'){
+        errors.password = 'Password is in correct'
+    }
+
     return errors;
 }
 
 // tokens
 const mxAge = 1 * 24 * 60 * 60;
 const createToken = (id) =>{
-    return jwt .sign({id} , process.env.JWT_SECRET , {
+    return jwt.sign({id} , process.env.JWT_SECRET , {
         expiresIn: mxAge
     });
 }
@@ -67,13 +76,28 @@ async function signup_post (req,res){
 
 async function login_post (req,res){
     const {email , password} = req.body;
-    console.log(email + password);
-    res.send('user login');
+
+     try {
+        const user = await User.login(email , password);
+        const token = createToken(user._id)
+        res.cookie('jwt', token , {httpOnly:true , maxAge: mxAge*1000}) 
+      
+        res.status(200).json({user: user._id})
+     } catch (err) {
+        const errors = handleErrors(err);
+        res.status(400).json({errors});
+     }
+}
+
+async function logout_get(req,res){
+    res.cookie('jwt', '', {maxAge: 1});
+    res.redirect('/');
 }
 
 module.exports = {
     signup_get,
     login_get,
     signup_post,
-    login_post
+    login_post,
+    logout_get,
 }

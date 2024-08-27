@@ -1,5 +1,5 @@
 const { Router } = require('express');
-const  {signup_get , login_get , signup_post  , login_post} = require('./auth.controller')
+const  {signup_get , login_get , signup_post  , login_post , logout_get} = require('./auth.controller')
 const router = Router();
 
 
@@ -13,5 +13,7 @@ router.get('/login' , login_get);
 
 
 router.post('/login' , login_post);
+
+router.get('/logout' , logout_get);
 
 module.exports = router;
