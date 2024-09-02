@@ -1,6 +1,7 @@
 const express = require('express');
 const adminMiddleware = require('../middlewares/admin');
 const {Admin , Course} = require('../models/schema');
+const jwt = require('jsonwebtoken');
 const zod = require('zod');
 async function signup_post(req,res){
     const username = req.body.username;
@@ -78,11 +79,28 @@ async function course_get(req,res){
     return res.status(200).json({courses: r});
 }
 
+async function signin(req,res){
+    const username = req.body.username;
+    const password = req.body.password;
+    const admin = await Admin.findOne({username});
+    if(!admin){
+        res.status(400).josn({
+            msg: "user does not exist"
+        })
+    }
+    const token = jwt.sign({
+        username
+    },process.env.JWT_SECRET);
+    return res.json({
+        token
+    })
 
+}
 
 
 module.exports = {
     signup_post,
     course_post,
     course_get,
+    signin,
 }

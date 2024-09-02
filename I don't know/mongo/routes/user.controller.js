@@ -41,8 +41,9 @@ async function course_get(req,res){
 }
 
 async function pcourse(req,res){
+    console.log(req.email)
     const id = req.params.id;
-    const email = req.headers.email;
+    const email = req.email;
     console.log('Hi form pcourse')
     const r = await User.updateOne({
         email,
@@ -60,6 +61,7 @@ async function pcourse(req,res){
 }
 
 async function ucourse(req,res){
+    
     const user = await User.findOne({
         email: req.headers.email
     });
@@ -74,9 +76,28 @@ async function ucourse(req,res){
     })
 }
 
+
+async function signin(req,res){
+    const username = req.body.username;
+    const password = req.body.password;
+    const admin = await User.findOne({username});
+    if(!admin){
+        res.status(400).josn({
+            msg: "user does not exist"
+        })
+    }
+    const token = jwt.sign({
+        username
+    },process.env.JWT_SECRET);
+    return res.json({
+        token
+    })
+
+}
 module.exports = {
     signup_post,
     course_get,
     pcourse,
     ucourse,
+    signin,
 }
